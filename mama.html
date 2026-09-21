@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Para mi mamá 🌹</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme: light;
+    --cream:#FFF8F6;
+    --cream-deep:#FFE6EC;
+    --ink:#4A2230;
+    --teal:#B0244F;
+    --gold:#C2185B;
+    --script:#9C3A5B;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--cream)}
+  body{
+    margin:0;height:100%;overflow:hidden;
+    background:radial-gradient(120% 90% at 50% 38%, #FFFDFC 0%, var(--cream) 55%, var(--cream-deep) 100%);
+    color:var(--ink);
+    font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji';
+    -webkit-font-smoothing:antialiased;
+  }
+  canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+
+  /* Pantalla de inicio */
+  #gate{
+    position:fixed;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;background:transparent;
+    cursor:pointer;color:var(--ink);font:inherit;z-index:5;
+    -webkit-tap-highlight-color:transparent;
+    transition:opacity .7s ease;
+  }
+  #gate.hide{opacity:0;pointer-events:none}
+  #gate:focus-visible{outline:2px solid var(--teal);outline-offset:-10px}
+  #gate span{
+    position:absolute;left:50%;top:calc(44% + clamp(78px,12vmin,124px));transform:translateX(-50%);
+    font-family:'Pinyon Script','Snell Roundhand','Brush Script MT',cursive;
+    font-size:clamp(28px,5.4vmin,42px);color:var(--script);white-space:nowrap;
+    animation:hint 2.6s ease-in-out infinite;
+  }
+  @keyframes hint{0%,100%{opacity:.55}50%{opacity:1}}
+
+  /* Mensaje */
+  #msg{
+    position:fixed;z-index:2;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;
+    pointer-events:none;overflow-y:auto;scrollbar-width:none;
+    font-size:var(--fs,20px);
+  }
+  #msg::-webkit-scrollbar{display:none}
+  body.land #msg{--fs:clamp(13px,min(1.45vw,2.7vh),23px);text-align:left}
+  body.port #msg{--fs:clamp(14px,4.1vw,21px);text-align:center;justify-content:flex-start;pointer-events:auto;
+    padding:1.2em 7vw calc(1.6em + env(safe-area-inset-bottom,0px))}
+
+  .ln{
+    margin:0;opacity:0;transform:translateY(22px);filter:blur(3px);
+    transition:opacity 1.6s ease, transform 1.8s cubic-bezier(.16,.8,.24,1), filter 1.6s ease;
+  }
+  .ln.on{opacity:1;transform:none;filter:none}
+
+  .title{font-weight:700;font-size:1em;letter-spacing:.15em;line-height:1.55;color:var(--teal);margin-bottom:1.35em}
+  .p{font-size:1.28em;line-height:1.45;font-weight:500;margin-bottom:.7em}
+  .script{
+    font-family:'Pinyon Script','Snell Roundhand','Brush Script MT',cursive;font-weight:400;
+    font-size:1.95em;line-height:1.25;color:var(--script);margin:.35em 0 .55em;
+  }
+  .love{font-size:2.15em;font-weight:700;line-height:1.12;color:var(--gold);margin:.2em 0 .3em;letter-spacing:.01em}
+  body.land .love{transform-origin:left center}
+  body.port .love{transform-origin:center}
+  .love.on{animation:beat 1.3s ease-in-out 1.8s infinite}
+  @keyframes beat{
+    0%,100%{transform:scale(1)}12%{transform:scale(1.06)}22%{transform:scale(1)}32%{transform:scale(1.035)}45%{transform:scale(1)}
+  }
+  .bday{font-size:1.08em;font-weight:700;letter-spacing:.13em;line-height:1.5;color:var(--ink);margin-top:.35em}
+
+  /* Volver a ver */
+  #replay{
+    position:fixed;z-index:6;top:calc(14px + env(safe-area-inset-top,0px));right:14px;
+    font:600 clamp(14px,2.2vmin,17px)/1 'Cormorant Garamond',Georgia,serif;letter-spacing:.06em;
+    color:var(--ink);background:rgba(255,248,246,.7);border:1px solid rgba(74,34,48,.25);border-radius:999px;
+    padding:9px 17px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity 1.2s ease, background .2s;
+  }
+  #replay.on{opacity:1;pointer-events:auto}
+  #replay:hover{background:rgba(255,230,236,.95)}
+  #replay:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+
+  @media (prefers-reduced-motion: reduce){
+    .ln{transition:opacity 1s ease;transform:none;filter:none}
+    .love.on{animation:none}
+    #gate span{animation:none}
+  }
+</style>
+</head>
+<body class="land">
+<canvas id="c" aria-hidden="true"></canvas>
+
+<button id="gate" type="button" aria-label="Comenzar la sorpresa"><span>Toca aquí</span></button>
+
+<section id="msg" aria-live="polite">
+  <h1 class="ln title">PARA MI MAMÁ 🌹</h1>
+  <p class="ln p">Todo lo bueno que hay en mí lo aprendí de ti.</p>
+  <p class="ln p">Tus manos me cuidaron, tu voz me guio y tu amor nunca me faltó.</p>
+  <p class="ln p">Si pudiera regalarte un jardín entero, aun así no alcanzaría para agradecerte.</p>
+  <p class="ln script">Eres mi lugar seguro, mi ejemplo y mi mayor razón para sonreír.</p>
+  <p class="ln love">Te amo, mamá</p>
+  <p class="ln bday">¡GRACIAS POR SER MI MAMÁ! 🌹💐</p>
+</section>
+
+<button id="replay" type="button">Ver de nuevo</button>
+
+<script>
+(() => {
+'use strict';
+
+/* ============================================================
+   Utilidades
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const cv = $('#c'), ctx = cv.getContext('2d');
+const gate = $('#gate'), msg = $('#msg'), replayBtn = $('#replay');
+const lines = [...msg.querySelectorAll('.ln')];
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SPEED = reduce ? 2 : 1;
+const TAU = Math.PI * 2;
+
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = x => { x = clamp(x); return x * x * (3 - 2 * x); };
+const easeSine = x => (1 - Math.cos(Math.PI * clamp(x))) / 2;
+const invEaseSine = p => Math.acos(1 - 2 * clamp(p)) / Math.PI;
+const easeCubic = x => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const easeOutBack = x => { x = clamp(x); const c1 = 1.35, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const gauss = (x, m, s) => Math.exp(-Math.pow((x - m) / s, 2));
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ============================================================
+   Línea de tiempo (milisegundos desde el toque inicial)
+   ============================================================ */
+const T = {
+  lineStart: 300,  lineDur: 1600,      // aparece el suelo
+  fallStart: 700,  fallDur: 4300,      // cae la semilla
+  land: 5000,                          // toca el suelo
+  sinkStart: 5300, sinkDur: 650,       // se hunde en la tierra
+  trunkStart: 5900, trunkDur: 3200,    // crece el tronco
+  bloomStart: 11500                    // empiezan las flores
+};
+
+/* ============================================================
+   Geometría del corazón (espacio del árbol: base del tronco = 0,0; y hacia arriba es negativo)
+   ============================================================ */
+const K = 17.2, BASE = 232;
+function heartXY(t, inset = 1){
+  const X = 16 * Math.pow(Math.sin(t), 3);
+  let Y = 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
+  Y = -1 + inset * (Y + 1);
+  return { x: K * inset * X, y: -(BASE + K * (Y + 17)) };
+}
+function heartPoly(inset, n = 360){ const a = []; for (let i = 0; i < n; i++) a.push(heartXY(i / n * TAU, inset)); return a; }
+function inPoly(x, y, poly){
+  let c = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++){
+    const a = poly[i], b = poly[j];
+    if ((a.y > y) !== (b.y > y) && x < (b.x - a.x) * (y - a.y) / (b.y - a.y) + a.x) c = !c;
+  }
+  return c;
+}
+const outerPoly = heartPoly(0.90);
+const crownPoly = heartPoly(0.93);
+const CROWN_CY = -495;
+
+/* ============================================================
+   Árbol: tronco + ramas + ramitas (crecen con el tiempo)
+   ============================================================ */
+const rnd = mulberry32(20260920);
+const bez = (p0,p1,p2,p3,u) => { const v=1-u, a=v*v*v, b=3*v*v*u, c=3*v*u*u, d=u*u*u;
+  return { x:a*p0.x+b*p1.x+c*p2.x+d*p3.x, y:a*p0.y+b*p1.y+c*p2.y+d*p3.y }; };
+function sampleBez(p0,p1,p2,p3,step = 7){
+  let len = 0, prev = p0;
+  for (let i = 1; i <= 30; i++){ const q = bez(p0,p1,p2,p3,i/30); len += Math.hypot(q.x-prev.x, q.y-prev.y); prev = q; }
+  const n = Math.max(8, Math.round(len / step)), pts = []; let d = 0, last = null;
+  for (let i = 0; i <= n; i++){
+    const q = bez(p0,p1,p2,p3,i/n);
+    if (last) d += Math.hypot(q.x-last.x, q.y-last.y);
+    q.d = d; pts.push(q); last = q;
+  }
+  return { pts, total: d };
+}
+function makeBranch(s, w0, w1, flare = 0){
+  s.pts.forEach(p => {
+    const u = p.d / s.total;
+    p.w = lerp(w0, w1, Math.pow(u, .85)) + flare * Math.pow(Math.max(0, 1 - u / .12), 2);
+  });
+  return { pts: s.pts, total: s.total, w0, start: 0, dur: 1000 };
+}
+const norm = v => { const l = Math.hypot(v.x, v.y) || 1; return { x: v.x / l, y: v.y / l }; };
+const mix = (a, b, t) => ({ x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t) });
+
+const branches = [];
+const TP = [{x:0,y:0},{x:18,y:-85},{x:-16,y:-165},{x:2,y:-240}];
+const trunk = makeBranch(sampleBez(...TP), 56, 24, 12);
+trunk.start = T.trunkStart; trunk.dur = T.trunkDur;
+branches.push(trunk);
+
+function makeTwig(parent, idx, side, depth){
+  const p = parent.pts[idx];
+  const q = parent.pts[Math.min(idx + 1, parent.pts.length - 1)];
+  const r = parent.pts[Math.max(idx - 1, 0)];
+  let ang = Math.atan2(q.y - r.y, q.x - r.x) + side * (0.6 + rnd() * 0.5);
+  const pts = [{ x: p.x, y: p.y, d: 0 }];
+  let x = p.x, y = p.y, d = 0;
+  const maxLen = (depth === 1 ? 60 : 38) + rnd() * (depth === 1 ? 75 : 40);
+  while (d < maxLen){
+    let da = -Math.PI / 2 - ang; da = Math.atan2(Math.sin(da), Math.cos(da));
+    ang += da * 0.035;
+    x += Math.cos(ang) * 6; y += Math.sin(ang) * 6;
+    if (!inPoly(x, y, outerPoly)) break;
+    d += 6; pts.push({ x, y, d });
+  }
+  if (pts.length < 5) return null;
+  const total = pts[pts.length - 1].d;
+  if (total < 26) return null;
+  const tw = makeBranch({ pts, total }, Math.min((p.w || 8) * .55, depth === 1 ? 7 : 4), 1.5);
+  tw.start = parent.start + parent.dur * invEaseSine(p.d / parent.total) + 150;
+  tw.dur = 900 + total * 5;
+  return tw;
+}
+
+const defs = [ // [posición en el tronco, punta x, punta y]
+  [.50,-135,-435],[.56,140,-440],[.68,-232,-562],[.74,232,-566],
+  [.84,-168,-690],[.88,172,-694],[.94,-72,-655],[.97,78,-660],[1,2,-585]
+];
+defs.forEach(([u, tx, ty], i) => {
+  const base = bez(...TP, u);
+  const tip = { x: tx + (rnd() - .5) * 20, y: ty + (rnd() - .5) * 20 };
+  for (let g = 0; g < 25 && !inPoly(tip.x, tip.y, outerPoly); g++){ tip.x = lerp(tip.x, 0, .08); tip.y = lerp(tip.y, -480, .08); }
+  const dx = tip.x - base.x, dy = tip.y - base.y, len = Math.hypot(dx, dy);
+  const dir = { x: dx / len, y: dy / len }, up = { x: 0, y: -1 };
+  const n1 = norm(mix(dir, up, .5)), n2 = norm(mix(dir, up, .35));
+  const perp = { x: -dir.y, y: dir.x };
+  const j1 = (rnd() - .5) * len * .12, j2 = (rnd() - .5) * len * .12;
+  const P1 = { x: base.x + n1.x * len * .38 + perp.x * j1, y: base.y + n1.y * len * .38 + perp.y * j1 };
+  const P2 = { x: tip.x - n2.x * len * .30 + perp.x * j2, y: tip.y - n2.y * len * .30 + perp.y * j2 };
+  const br = makeBranch(sampleBez(base, P1, P2, tip), lerp(17, 12.5, i / 8), 4.2);
+  br.start = T.trunkStart + 2100 + i * 260;
+  br.dur = 2200 + len * 1.6;
+  branches.push(br);
+});
+// ramitas de primer y segundo nivel
+const mains = branches.slice(1);
+mains.forEach(m => {
+  [.40,.55,.70,.84].forEach((f, k) => {
+    const idx = Math.round(f * (m.pts.length - 1));
+    const tw = makeTwig(m, idx, (k % 2 ? 1 : -1) * (rnd() < .85 ? 1 : -1), 1);
+    if (tw){
+      branches.push(tw);
+      if (tw.total > 55 && rnd() < .7){
+        const t2 = makeTwig(tw, Math.round(.6 * (tw.pts.length - 1)), rnd() < .5 ? 1 : -1, 2);
+        if (t2) branches.push(t2);
+      }
+    }
+  });
+});
+
+// esqueleto para saber cuándo "existe" cada zona del árbol
+const skeleton = [];
+branches.forEach(b => b.pts.forEach((p, i) => {
+  if (i % 2 === 0 || i === b.pts.length - 1)
+    skeleton.push({ x: p.x, y: p.y, t: b.start + b.dur * invEaseSine(p.d / b.total) });
+}));
+
+/* ============================================================
+   Flores del corazón (borde nítido + relleno tipo Poisson)
+   ============================================================ */
+const flowers = [];
+(function buildFlowers(){
+  const ring = (() => {
+    const N = 2400, pts = [], acc = [0];
+    for (let i = 0; i <= N; i++) pts.push(heartXY(i / N * TAU, .93));
+    for (let i = 1; i <= N; i++) acc.push(acc[i-1] + Math.hypot(pts[i].x-pts[i-1].x, pts[i].y-pts[i-1].y));
+    const total = acc[N], m = Math.round(total / 19), out = []; let k = 0;
+    for (let j = 0; j < m; j++){
+      const target = j * total / m;
+      while (acc[k+1] < target) k++;
+      const u = (target - acc[k]) / (acc[k+1] - acc[k]);
+      out.push({ x: lerp(pts[k].x, pts[k+1].x, u), y: lerp(pts[k].y, pts[k+1].y, u) });
+    }
+    return out;
+  })();
+
+  const cell = 14, grid = new Map(), all = [];
+  const gk = (cx, cy) => (cx + 300) * 1000 + (cy + 300);
+  const add = (x, y) => {
+    const k = gk(Math.floor(x / cell), Math.floor(y / cell));
+    (grid.get(k) || grid.set(k, []).get(k)).push({ x, y }); all.push({ x, y });
+  };
+  const far = (x, y, d) => {
+    const cx = Math.floor(x / cell), cy = Math.floor(y / cell), rr = Math.ceil(d / cell);
+    for (let dx = -rr; dx <= rr; dx++) for (let dy = -rr; dy <= rr; dy++){
+      const arr = grid.get(gk(cx + dx, cy + dy));
+      if (arr) for (const p of arr) if (Math.hypot(p.x - x, p.y - y) < d) return false;
+    }
+    return true;
+  };
+  ring.forEach(p => add(p.x, p.y));
+  const bx0 = -290, bx1 = 290, by0 = -760, by1 = -232;
+  for (const [minD, tries] of [[22, 16000], [17, 14000]]){
+    for (let i = 0; i < tries; i++){
+      const x = lerp(bx0, bx1, rnd()), y = lerp(by0, by1, rnd());
+      if (inPoly(x, y, crownPoly) && far(x, y, minD)) add(x, y);
+    }
+  }
+  all.forEach(p => {
+    // cuándo existe la rama más cercana
+    let best = 1e9, bt = 0;
+    for (const s of skeleton){
+      const d = Math.hypot(s.x - p.x, s.y - p.y);
+      if (d < best){ best = d; bt = s.t; }
+    }
+    flowers.push({
+      x: p.x, y: p.y, r: 17.5 + rnd() * 4, rot: rnd() * TAU, spin: (rnd() - .5) * 2,
+      v: Math.floor(rnd() * 5), reach: bt, key: bt + best * 8 + rnd() * 1500
+    });
+  });
+  flowers.sort((a, b) => a.key - b.key);
+  // ritmo: al principio una por una, despacio; luego cada vez más rápido
+  let tt = T.bloomStart;
+  flowers.forEach((f, i) => {
+    tt = Math.max(tt, f.reach + 250);
+    f.a = tt;
+    tt += Math.max(16, 200 * Math.exp(-i / 34));
+  });
+})();
+const NF = flowers.length;
+T.bloomEnd = flowers[NF - 1].a + 900;
+T.glow = T.bloomEnd + 400;                 // brillo + latido
+T.shift = T.glow + 2200;                   // el árbol se acomoda
+T.shiftDur = 2600;
+T.textAt = [];
+{
+  let c = T.shift + 900;
+  T.textAt.push(c);            // título
+  c += 2100; T.textAt.push(c); // 1
+  c += 2500; T.textAt.push(c); // 2
+  c += 2500; T.textAt.push(c); // 3
+  c += 2500; T.textAt.push(c); // Eres el sol...
+  c += 2700; T.textAt.push(c); // Contigo el mundo siempre es Mejor
+  c += 1700; T.textAt.push(c); // ¡Y MUY FELIZ CUMPLEAÑOS!
+  T.conf = c;
+  T.replay = c + 3500;
+}
+
+/* ============================================================
+   Sprites de girasol (se dibujan una vez, luego se estampan)
+   ============================================================ */
+const PALETTES = ['#D93A62', '#F06292', '#E5486F', '#C62450', '#F2799E'];
+const hexRGB = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mixc = (a, b, t) => { const A = hexRGB(a), B = hexRGB(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',')})`; };
+function makeFlowerSprite(size, base, seed){
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const g = c.getContext('2d'), R = size / 2, rng = mulberry32(seed);
+  g.translate(R, R);
+  const layer = (n, rad, pr, off, c0, c1) => {
+    for (let i = 0; i < n; i++){
+      g.save();
+      g.rotate(off + i * TAU / n + (rng() - .5) * .12);
+      const gr = g.createLinearGradient(0, rad - pr, 0, rad + pr);
+      gr.addColorStop(0, c1); gr.addColorStop(1, c0);
+      g.fillStyle = gr;
+      g.beginPath(); g.arc(0, rad, pr, 0, TAU); g.fill();
+      g.strokeStyle = 'rgba(110,15,45,.22)'; g.lineWidth = R * .02; g.stroke();
+      g.restore();
+    }
+  };
+  const off = rng() * TAU;
+  layer(6, R * .50, R * .50, off,        mixc(base, '#FFFFFF', .35), mixc(base, '#000000', .05));
+  layer(5, R * .32, R * .36, off + .5,   mixc(base, '#FFFFFF', .10), mixc(base, '#000000', .20));
+  layer(4, R * .16, R * .24, off + 1.1,  mixc(base, '#000000', .15), mixc(base, '#000000', .40));
+  g.strokeStyle = 'rgba(80,8,32,.55)'; g.lineWidth = R * .03; g.lineCap = 'round';
+  for (let k = 0; k < 3; k++){ g.beginPath(); g.arc(0, 0, R * (.05 + .045 * k), off + k * 1.3, off + k * 1.3 + 4.2); g.stroke(); }
+  return c;
+}
+const spritesSmall = PALETTES.map((p, i) => makeFlowerSprite(64,  p, 11 + i));
+const spritesBig   = PALETTES.map((p, i) => makeFlowerSprite(128, p, 11 + i));
+const introSprite  = makeFlowerSprite(320, PALETTES[1], 5);
+const seedSprite   = makeFlowerSprite(48,  PALETTES[1], 9);
+
+/* ============================================================
+   Pantalla y disposición
+   ============================================================ */
+let W = 0, H = 0, dpr = 1, portrait = false, G, F;
+function resize(){
+  W = window.innerWidth; H = window.innerHeight;
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  portrait = W / H < 1.05;
+  document.body.classList.toggle('port', portrait);
+  document.body.classList.toggle('land', !portrait);
+  const TH = 760, TW = 600;
+  if (portrait){
+    G = { x: W / 2, y: H * .88, s: Math.min(H * .80 / TH, W * .90 / TW) };
+    F = { x: W / 2, y: H * .50, s: Math.min(H * .42 / TH, W * .92 / TW) };
+    msg.style.cssText = `left:0;right:0;top:${F.y + H * .025}px;bottom:0;width:auto;height:auto`;
+  } else {
+    G = { x: W / 2, y: H * .90, s: Math.min(H * .82 / TH, W * .60 / TW) };
+    const sF = Math.min(H * .78 / TH, W * .44 / TW);
+    F = { x: W - W * .05 - (TW / 2) * sF, y: H * .88, s: sF };
+    msg.style.cssText = `left:${W * .06}px;top:${H * .05}px;width:${Math.min(W * .40, 540)}px;height:${F.y - H * .09}px`;
+  }
+}
+const layoutAt = t => {
+  const e = easeCubic((t - T.shift) / T.shiftDur);
+  return { x: lerp(G.x, F.x, e), y: lerp(G.y, F.y, e), s: lerp(G.s, F.s, e) };
+};
+
+/* ============================================================
+   Dibujo
+   ============================================================ */
+function drawIntro(now, fade){
+  const R0 = clamp(Math.min(W, H) * .085, 44, 86), cx = W / 2, cy = H * .44 - fade * 40;
+  const ph = (now % 2600) / 2600, a = 1 - fade;
+  ctx.save();
+  ctx.globalAlpha = .35 * (1 - ph) * a; ctx.strokeStyle = '#E5486F'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx, cy, R0 * (1.15 + .55 * ph), 0, TAU); ctx.stroke();
+  ctx.restore();
+  const br = 1 + .03 * Math.sin(now / 600) - fade * .5;
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.translate(cx, cy); ctx.rotate(now * .00035); ctx.scale(br, br);
+  ctx.drawImage(introSprite, -R0, -R0, R0 * 2, R0 * 2);
+  ctx.restore();
+}
+
+function drawGround(t, L){
+  const p = easeSine((t - T.lineStart) / T.lineDur);
+  if (p <= 0) return;
+  const half = W * .44 * p;
+  const g = ctx.createLinearGradient(W / 2 - half, 0, W / 2 + half, 0);
+  g.addColorStop(0, 'rgba(150,105,95,0)'); g.addColorStop(.18, 'rgba(150,105,95,.5)');
+  g.addColorStop(.82, 'rgba(150,105,95,.5)'); g.addColorStop(1, 'rgba(150,105,95,0)');
+  ctx.strokeStyle = g; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(W / 2 - half, L.y); ctx.lineTo(W / 2 + half, L.y); ctx.stroke();
+}
+
+function drawGlow(t, L){
+  const g = smooth((t - T.bloomStart) / (T.bloomEnd - T.bloomStart)) * .16 + smooth((t - T.glow) / 2200) * .34;
+  if (g < .01) return;
+  const cx = L.x, cy = L.y + CROWN_CY * L.s, r = 400 * L.s;
+  const gr = ctx.createRadialGradient(cx, cy, r * .1, cx, cy, r);
+  gr.addColorStop(0, `rgba(255,140,175,${g})`);
+  gr.addColorStop(.55, `rgba(255,175,200,${g * .45})`);
+  gr.addColorStop(1, 'rgba(255,200,222,0)');
+  ctx.fillStyle = gr; ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+}
+
+function drawSeed(t){
+  if (t < T.fallStart) return;
+  const gx = G.x, gy = G.y, R = clamp(W * .012 + 7, 9, 14);
+  if (t < T.land){
+    const p = clamp((t - T.fallStart) / T.fallDur);
+    const e = .3 * p + .7 * easeSine(p);
+    const y = lerp(-30, gy - R, e);
+    const x = gx + Math.sin(p * Math.PI * 3.4) * 26 * (1 - p * p);
+    ctx.save(); // sombra que crece al acercarse
+    ctx.globalAlpha = .16 * p * p; ctx.fillStyle = '#5b4520';
+    ctx.beginPath(); ctx.ellipse(gx, gy + 1, R * (.6 + p), R * .18, 0, 0, TAU); ctx.fill();
+    ctx.restore();
+    ctx.save(); ctx.translate(x, y); ctx.rotate(p * 7 + Math.sin(p * 12) * .3);
+    ctx.drawImage(seedSprite, -R, -R, R * 2, R * 2); ctx.restore();
+    return;
+  }
+  const a = t - T.land;
+  const sq = a < 280 ? Math.sin(a / 280 * Math.PI) * .22 : 0;
+  const sink = easeSine((t - T.sinkStart) / T.sinkDur);
+  if (sink < .99){
+    ctx.save();
+    ctx.translate(gx, gy - R + R * sq + sink * R * .9);
+    ctx.scale(1 + sq * .6, 1 - sq); ctx.rotate(7);
+    ctx.globalAlpha = 1 - sink;
+    ctx.drawImage(seedSprite, -R, -R, R * 2, R * 2);
+    ctx.restore();
+  }
+  const age = a / 1000; // polen
+  if (age < 1.2){
+    ctx.save();
+    for (let i = 0; i < 14; i++){
+      const ang = -Math.PI * (.08 + .84 * i / 13), sp = 38 + (i * 37 % 30);
+      const d = sp * age * (1 - age * .4);
+      ctx.globalAlpha = Math.max(0, 1 - age / 1.2) * .9;
+      ctx.fillStyle = i % 2 ? '#F48FB1' : '#FFC1D3';
+      ctx.beginPath(); ctx.arc(gx + Math.cos(ang) * d, gy - 4 + Math.sin(ang) * d + age * age * 26, 1.8 + (i % 3) * .7, 0, TAU); ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+function drawBranch(br, t){
+  const x = (t - br.start) / br.dur;
+  if (x <= 0) return;
+  const p = x >= 1 ? 1 : easeSine(x), Ltot = p * br.total, pts = br.pts;
+  const done = smooth((p - .85) / .15), tipLen = Math.min(80, br.total * .5);
+  const P = [];
+  for (let i = 0; i < pts.length; i++){
+    const q = pts[i];
+    if (q.d > Ltot){
+      if (i > 0){ const a = pts[i-1], u = (Ltot - a.d) / (q.d - a.d);
+        P.push({ x: lerp(a.x, q.x, u), y: lerp(a.y, q.y, u), d: Ltot, w: lerp(a.w, q.w, u) }); }
+      break;
+    }
+    P.push(q);
+  }
+  const n = P.length; if (n < 2) return;
+  const ws = new Array(n), nx = new Array(n), ny = new Array(n);
+  for (let i = 0; i < n; i++){
+    const grow = smooth((Ltot - P[i].d) / tipLen);
+    ws[i] = P[i].w * (grow + (1 - grow) * done);
+    const a = P[Math.max(i - 1, 0)], b = P[Math.min(i + 1, n - 1)];
+    const tx = b.x - a.x, ty = b.y - a.y, l = Math.hypot(tx, ty) || 1;
+    nx[i] = -ty / l; ny[i] = tx / l;
+  }
+  ctx.beginPath();
+  for (let i = 0; i < n; i++){ const h = ws[i] / 2; const X = P[i].x + nx[i] * h, Y = P[i].y + ny[i] * h; i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
+  for (let i = n - 1; i >= 0; i--){ const h = ws[i] / 2; ctx.lineTo(P[i].x - nx[i] * h, P[i].y - ny[i] * h); }
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.arc(P[n-1].x, P[n-1].y, Math.max(.01, ws[n-1] / 2), 0, TAU); ctx.fill();
+  if (br.w0 >= 9){ // luz suave por un costado
+    const prev = ctx.fillStyle;
+    ctx.fillStyle = 'rgba(255,255,255,.11)';
+    ctx.beginPath();
+    for (let i = 0; i < n; i++){ const w = ws[i]; const X = P[i].x - nx[i] * w * .40, Y = P[i].y - ny[i] * w * .40; i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
+    for (let i = n - 1; i >= 0; i--){ const w = ws[i]; ctx.lineTo(P[i].x - nx[i] * w * .12, P[i].y - ny[i] * w * .12); }
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = prev;
+  }
+}
+
+function star(x, y, s, a){
+  ctx.save(); ctx.translate(x, y); ctx.globalAlpha = a; ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath(); ctx.moveTo(0, -s);
+  ctx.quadraticCurveTo(s * .12, -s * .12, s, 0); ctx.quadraticCurveTo(s * .12, s * .12, 0, s);
+  ctx.quadraticCurveTo(-s * .12, s * .12, -s, 0); ctx.quadraticCurveTo(-s * .12, -s * .12, 0, -s);
+  ctx.fill(); ctx.restore();
+}
+
+function drawFallingPetals(t, L){
+  if (reduce) return;
+  const t0 = T.glow + 800, GAP = 800;
+  const kMax = Math.floor((t - t0) / GAP);
+  if (kMax < 0) return;
+  const sprites = spritesSmall;
+  for (let k = Math.max(0, kMax - 26); k <= kMax; k++){
+    const r = mulberry32(k * 7919 + 13);
+    const f = flowers[Math.floor(r() * NF)];
+    const speed = 50 + r() * 35, groundY = 6 + r() * 16, amp = 18 + r() * 30, fr = .0009 + r() * .0006;
+    const ph = r() * TAU, drift = (r() - .5) * 26, tiny = r() < .4, spinDir = r() < .5 ? -1 : 1;
+    const age = t - (t0 + k * GAP);
+    const fallT = (groundY - f.y) / speed * 1000;
+    if (age > fallT + 6500) continue;
+    const falling = age < fallT;
+    const y = falling ? f.y + speed * age / 1000 : groundY;
+    const x = f.x + Math.sin(Math.min(age, fallT) * fr + ph) * amp * (falling ? 1 : 0) + drift * Math.min(age, fallT) / 1000
+              + Math.sin(fallT * fr + ph) * amp * (falling ? 0 : 1);
+    const alpha = falling ? Math.min(1, age / 500) : 1 - clamp((age - fallT - 4200) / 2300);
+    ctx.save(); ctx.translate(x, y); ctx.rotate(falling ? age * .0021 * spinDir : ph); ctx.globalAlpha = alpha;
+    if (tiny){ const rr = 7.5; ctx.drawImage(sprites[k % 5], -rr, -rr, rr * 2, rr * 2); }
+    else { ctx.fillStyle = k % 2 ? '#F48FB1' : '#FF8FA9'; ctx.beginPath(); ctx.ellipse(0, 0, 8, 3.6, 0, 0, TAU); ctx.fill(); }
+    ctx.restore();
+  }
+}
+
+const CONF_COLORS = ['#F06292', '#FF8FA9', '#C62450', '#FFD1DC', '#FFC061', '#E8A0BF'];
+const confetti = (() => {
+  const r = mulberry32(4242), a = [];
+  for (let i = 0; i < 90; i++){
+    const ang = -Math.PI / 2 + (r() - .5) * 2.5, sp = 140 + r() * 300;
+    a.push({ x0: (r() - .5) * 320, y0: CROWN_CY + (r() - .5) * 160, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+             w: 5 + r() * 5, h: 3 + r() * 4, col: CONF_COLORS[i % CONF_COLORS.length], ph: r() * TAU, fl: 4 + r() * 4, life: 4200 + r() * 2600 });
+  }
+  return a;
+})();
+function drawConfetti(t){
+  if (reduce || t < T.conf) return;
+  const K2 = 1.1, VT = 70;
+  for (const c of confetti){
+    const age = (t - T.conf) / 1000;
+    if (age * 1000 > c.life) continue;
+    const e = (1 - Math.exp(-K2 * age)) / K2;
+    const x = c.x0 + c.vx * e + Math.sin(age * c.fl + c.ph) * 10;
+    let y = c.y0 + VT * age + (c.vy - VT) * e;
+    let alpha = 1 - clamp((age * 1000 - (c.life - 1200)) / 1200);
+    if (y > 8){ y = 8; alpha *= 1 - clamp((age * 1000 - (c.life - 2400)) / 1200); }
+    ctx.save(); ctx.translate(x, y); ctx.rotate(c.ph + age * c.fl * .5);
+    ctx.scale(1, Math.cos(age * c.fl * 1.3 + c.ph)); ctx.globalAlpha = alpha; ctx.fillStyle = c.col;
+    ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h); ctx.restore();
+  }
+}
+
+function drawTree(t, L){
+  ctx.save();
+  ctx.translate(L.x, L.y);
+  const sway = reduce ? 0 : .0055 * smooth((t - T.trunkStart) / 6000) * Math.sin(t / 1500);
+  ctx.rotate(sway);
+  ctx.scale(L.s, L.s);
+
+  // tronco y ramas
+  const grad = ctx.createLinearGradient(0, 0, 0, -700);
+  grad.addColorStop(0, '#4E3329'); grad.addColorStop(.5, '#6E4A3A'); grad.addColorStop(1, '#8F664F');
+  ctx.fillStyle = grad;
+  for (let i = branches.length - 1; i >= 0; i--) drawBranch(branches[i], t);
+
+  // flores (con latido una vez completo)
+  let sc = 1;
+  if (t >= T.glow){
+    const amp = smooth((t - T.glow) / 1500), ph = ((t - T.glow) % 1300) / 1300;
+    sc = 1 + .022 * amp * (gauss(ph, .09, .05) + .6 * gauss(ph, .30, .055));
+  }
+  ctx.save();
+  ctx.translate(0, CROWN_CY); ctx.scale(sc, sc); ctx.translate(0, -CROWN_CY);
+  const sprites = (2 * 20 * L.s * dpr > 70) ? spritesBig : spritesSmall;
+  for (let i = 0; i < NF; i++){
+    const f = flowers[i], age = t - f.a;
+    if (age <= 0) break;
+    const p = clamp(age / 900), r = f.r * easeOutBack(p);
+    ctx.save();
+    ctx.translate(f.x, f.y);
+    ctx.rotate(f.rot + (1 - easeSine(p)) * 1.6 + (reduce ? 0 : f.spin * t * .00006));
+    ctx.globalAlpha = Math.min(1, p * 2.5);
+    ctx.drawImage(sprites[f.v], -r, -r, r * 2, r * 2);
+    ctx.restore();
+  }
+  // destellos
+  if (t > T.glow - 600){
+    const on = smooth((t - T.glow + 600) / 1200);
+    for (let j = 0; j < 16; j++){
+      const f = flowers[(j * 53 + 7) % NF];
+      const per = 2400 + (j * 211 % 1600), ph = ((t + j * 777) % per) / per;
+      const a = Math.pow(Math.sin(ph * Math.PI), 2) * on;
+      if (a > .02) star(f.x, f.y, 9 + (j % 4) * 3, a);
+    }
+  }
+  ctx.restore();
+
+  drawFallingPetals(t, L);
+  drawConfetti(t);
+  ctx.restore();
+}
+
+/* ============================================================
+   Bucle principal
+   ============================================================ */
+const params = new URLSearchParams(location.search);
+const debugFreeze = params.has('f') ? +params.get('f') : null;   // ?f=ms → muestra un instante fijo
+const debugSkip = params.has('t') ? +params.get('t') : 0;         // ?t=ms → arranca desde ese instante
+let started = false, tAnim = 0, last = 0, shown = [];
+
+function start(){
+  if (started) return;
+  started = true; tAnim = debugSkip;
+  gate.classList.add('hide'); gate.setAttribute('aria-hidden', 'true'); gate.tabIndex = -1;
+}
+function replay(){
+  tAnim = 0; shown = [];
+  lines.forEach(l => l.classList.remove('on'));
+  replayBtn.classList.remove('on');
+}
+gate.addEventListener('click', start);
+replayBtn.addEventListener('click', replay);
+window.addEventListener('resize', resize);
+
+function frame(now){
+  requestAnimationFrame(frame);
+  const dt = Math.min(now - last, 80); last = now;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  ctx.imageSmoothingQuality = 'high';
+
+  if (!started){ drawIntro(now, 0); return; }
+  tAnim = debugFreeze !== null ? debugFreeze : tAnim + dt * SPEED;
+  const t = tAnim;
+
+  if (t < 700) drawIntro(now, easeSine(t / 700));
+
+  const L = layoutAt(t);
+  drawGround(t, L);
+  drawGlow(t, L);
+  drawSeed(t);
+  drawTree(t, L);
+
+  for (let i = 0; i < lines.length; i++){
+    if (t >= T.textAt[i] && !shown[i]){ shown[i] = true; lines[i].classList.add('on'); }
+  }
+  if (t >= T.replay) replayBtn.classList.add('on');
+}
+
+resize();
+if (params.has('t') || params.has('f')) start();
+requestAnimationFrame(now => { last = now; frame(now); });
+window.__timeline = T; // por si quieres ajustar tiempos
+})();
+</script>
+</body>
+</html>
